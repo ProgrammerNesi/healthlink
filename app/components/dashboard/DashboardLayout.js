@@ -39,7 +39,7 @@ export default function DashboardLayout({ user, children }) {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex gap-6">
-          <DashboardSidebar user={user} />
+          {/* <DashboardSidebar user={user} /> */}
           <div className="flex-1">
             {children}
           </div>

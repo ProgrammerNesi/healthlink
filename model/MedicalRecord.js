@@ -1,3 +1,4 @@
+// models/MedicalRecord.js (Add this field)
 import mongoose from 'mongoose'
 
 const MedicalRecordSchema = new mongoose.Schema({
@@ -6,37 +7,27 @@ const MedicalRecordSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
-  
-  // Patient Information (can be human or animal)
   patientId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
-  patientType: {
-    type: String,
-    enum: ['human', 'animal'],
-    required: true
-  },
-  
-  // Medical Professional
   doctorId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  },
-  labId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  },
-  
-  // Record Details
-  recordType: {
-    type: String,
-    enum: ['consultation', 'lab_test', 'prescription', 'vaccination', 'surgery', 'follow_up'],
+    ref: 'User',
     required: true
   },
-  
-  // Symptoms & Diagnosis
+  recordType: {
+    type: String,
+    required: true,
+    enum: ['consultation', 'followup', 'emergency', 'routine', 'lab_test'],
+    default: 'consultation'
+  },
+  dateOfVisit: {
+    type: Date,
+    required: true,
+    default: Date.now
+  },
   symptoms: {
     primary: [String],
     secondary: [String],
@@ -44,111 +35,47 @@ const MedicalRecordSchema = new mongoose.Schema({
     severity: {
       type: String,
       enum: ['mild', 'moderate', 'severe']
-    }
+    },
+    description: String
   },
-  
-  // Vital Signs
   vitalSigns: {
     bloodPressure: String,
     heartRate: Number,
     temperature: Number,
-    bloodSugar: Number,
     weight: Number,
-    height: Number
+    height: Number,
+    oxygenSaturation: Number,
+    respiratoryRate: Number
   },
-  
-  // Diagnosis
   diagnosis: {
     condition: String,
+    icdCode: String,
     description: String,
     confidence: {
       type: String,
       enum: ['suspected', 'confirmed']
     }
   },
-  
-  // Lab Results
-  labResults: {
-    testName: String,
-    resultValue: String,
-    normalRange: String,
-    unit: String,
-    labName: String
-  },
-  
-  // Treatment
   treatment: {
     prescriptions: [{
       medicineName: String,
       dosage: String,
       frequency: String,
-      duration: String
+      duration: String,
+      instructions: String
     }],
     recommendations: [String],
-    followUpDate: Date
+    followUpDate: Date,
+    notes: String
   },
-  
-  // AI Analysis Results
-  aiAnalysis: {
-    // Diabetes Risk (for humans)
-    diabetesRisk: {
-      riskScore: Number,
-      riskLevel: {
-        type: String,
-        enum: ['low', 'medium', 'high', 'critical']
-      },
-      keyFactors: [String],
-      confidence: Number,
-      recommendations: [String]
-    },
-    
-    // General Health Insights
-    healthInsights: {
-      overallHealth: {
-        type: String,
-        enum: ['excellent', 'good', 'fair', 'poor']
-      },
-      riskAreas: [String],
-      warningSigns: [String],
-      improvementSuggestions: [String]
-    },
-    
-    // Animal Health Analysis
-    animalHealth: {
-      conditionRisk: String,
-      vaccinationStatus: String,
-      healthScore: Number,
-      recommendations: [String]
-    },
-    
-    // Pattern Detection
-    patterns: {
-      symptomPatterns: [String],
-      trend: {
-        type: String,
-        enum: ['improving', 'stable', 'deteriorating']
-      },
-      anomalyDetected: Boolean
-    },
-    
-    // AI Metadata
-    analysisDate: {
-      type: Date,
-      default: Date.now
-    },
-    modelVersion: String,
-    nextAnalysisDue: Date
-  },
-  
-  // Additional Info
+  labResults: [{
+    testName: String,
+    resultValue: String,
+    normalRange: String,
+    unit: String,
+    labName: String
+  }],
   notes: String,
-  hospital: String,
-  visitType: {
-    type: String,
-    enum: ['in_person', 'teleconsultation', 'emergency']
-  },
-  
-  // Status
   status: {
     type: String,
     enum: ['active', 'completed', 'cancelled'],
@@ -158,11 +85,10 @@ const MedicalRecordSchema = new mongoose.Schema({
   timestamps: true
 })
 
-// Indexes for better query performance
+// Indexes for better performance
 MedicalRecordSchema.index({ patientId: 1, createdAt: -1 })
 MedicalRecordSchema.index({ doctorId: 1 })
 MedicalRecordSchema.index({ recordType: 1 })
-MedicalRecordSchema.index({ 'aiAnalysis.diabetesRisk.riskLevel': 1 })
-MedicalRecordSchema.index({ 'aiAnalysis.analysisDate': 1 })
+MedicalRecordSchema.index({ dateOfVisit: -1 }) // Add index for date of visit
 
 export default mongoose.models.MedicalRecord || mongoose.model('MedicalRecord', MedicalRecordSchema)
